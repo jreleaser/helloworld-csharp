@@ -1,0 +1,61 @@
+environment:
+  properties:
+    artifactsDir: out/jreleaser/assemble/helloworld/archive
+
+project:
+  name: helloworld
+  description: HelloWorld in C#
+  longDescription: HelloWorld in C#
+  links:
+    homepage: https://github.com/aalmiray/helloworld-csharp
+  authors:
+    - Andres Almiray
+  license: MIT
+  inceptionYear: 2022
+  stereotype: cli
+
+platform:
+  replacements:
+    aarch_64: arm64
+    x86_64: x64
+    windows: win
+    
+release:
+  github:
+    overwrite: true
+    changelog:
+      formatted: ALWAYS
+      preset: conventional-commits
+      contributors:
+        format: '- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}'
+
+assemble:
+  archive:
+    helloworld:
+      active: ALWAYS
+      formats: [ ZIP ]
+      attachPlatform: true
+      fileSets:
+        - input: 'bin/{{ osPlatformReplaced }}'
+          output: 'bin'
+          includes: [ 'helloworld{.exe,}' ]
+        - input: '.'
+          includes: [ 'LICENSE' ]
+          
+distributions:
+  helloworld:
+    artifacts:
+      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-osx-arm64.zip'
+        platform: 'osx-aarch_64'
+      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-osx-x64.zip'
+        platform: 'osx-x86_64'
+      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-win-x64.zip'
+        platform: 'windows-x86_64'
+      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-win-arm64.zip'
+        platform: 'windows-aarch_64'
+      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-linux-x64.zip'
+        platform: 'linux-x86_64'
+      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-linux-arm64.zip'
+        platform: 'linux-aarch_64'
+      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-linux_musl-x64.zip'
+        platform: 'linux_musl-x86_64'
