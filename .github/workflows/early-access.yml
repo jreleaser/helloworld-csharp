@@ -28,21 +28,21 @@ jobs:
   build:
     needs: [ precheck ]
     if: endsWith(${{ needs.precheck.outputs.VERSION }}, '-SNAPSHOT')
-    uses: aalmiray/helloworld-csharp/.github/workflows/reusable-build.yml@main
+    uses: jreleaser/helloworld-csharp/.github/workflows/reusable-build.yml@main
     with:
       project-version: ${{ needs.precheck.outputs.VERSION }}
 
   build-osx-arm:
     needs: [ precheck ]
     if: endsWith(${{ needs.precheck.outputs.VERSION }}, '-SNAPSHOT')
-    uses: aalmiray/helloworld-csharp/.github/workflows/reusable-build-osx-arm.yml@main
+    uses: jreleaser/helloworld-csharp/.github/workflows/reusable-build-osx-arm.yml@main
     with:
       project-version: ${{ needs.precheck.outputs.VERSION }}
 
   assemble:
     needs: [ precheck, build, build-osx-arm ]
     if: endsWith(${{ needs.precheck.outputs.VERSION }}, '-SNAPSHOT')
-    uses: aalmiray/helloworld-csharp/.github/workflows/reusable-assemble.yml@main
+    uses: jreleaser/helloworld-csharp/.github/workflows/reusable-assemble.yml@main
     with:
       project-version: ${{ needs.precheck.outputs.VERSION }}
 

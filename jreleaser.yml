@@ -7,10 +7,10 @@ project:
   description: HelloWorld in C#
   longDescription: HelloWorld in C#
   links:
-    homepage: https://github.com/aalmiray/helloworld-csharp
+    homepage: https://github.com/jreleaser/helloworld-csharp
   authors:
     - Andres Almiray
-  license: MIT
+  license: APACHE-2.0
   inceptionYear: 2022
   stereotype: cli
 
@@ -37,11 +37,11 @@ assemble:
       formats: [ ZIP ]
       attachPlatform: true
       fileSets:
-        - input: 'bin/{{ osPlatformReplaced }}'
+        - input: 'bin/{{osPlatformReplaced}}'
           output: 'bin'
-          includes: [ 'helloworld{.exe,}' ]
+          includes: ['helloworld{.exe,}']
         - input: '.'
-          includes: [ 'LICENSE' ]
+          includes: ['LICENSE']
           
 distributions:
   helloworld:
