@@ -1,0 +1,39 @@
+name: Build
+
+on:
+  workflow_call:
+    inputs:
+      project-version:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Dotnet
+        uses: actions/setup-dotnet@v3.0.2
+        with:
+          dotnet-version: '6.0'
+
+      - name: Create binaries
+        run: |
+          VERSION=${{ inputs.project-version }}
+          dotnet build --configuration Release
+          mkdir bin
+          for runtime in linux-x64 linux-musl-x64 linux-arm64 win-x64 win-arm64 osx-x64
+          do
+            dotnet publish src/helloworld/helloworld.csproj -r $runtime --configuration Release /p:Version=$VERSION --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true --output bin/$runtime
+          done
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          retention-days: 1
+          name: artifacts
+          path: |
+            bin

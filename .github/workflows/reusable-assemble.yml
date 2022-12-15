@@ -1,0 +1,59 @@
+name: Assemble
+
+on:
+  workflow_call:
+    inputs:
+      project-version:
+        required: true
+        type: string
+
+jobs:
+  assemble:
+    name: 'Assemble ${{ matrix.platform }}'
+    strategy:
+      fail-fast: true
+      matrix:
+        job:
+          - { platform: osx-x86_64     }
+          - { platform: osx-aarch_64   }
+          - { platform: windows-x86_64 }
+          - { platform: windows-aarch_64 }
+          - { platform: linux-x86_64   }
+          - { platform: linux-aarch_64 }
+          - { platform: linux_musl-x86_64 }
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts
+          path: bin
+
+      - name: Download osx-arm artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: artifacts-osx-arm
+          path: bin/osx-arm64
+
+      - name: Add executable permissions
+        run: chmod +x bin/**/*
+          
+      - name: Assemble
+        uses: jreleaser/release-action@v2
+        with:
+          arguments: assemble
+        env:
+          JRELEASER_PROJECT_VERSION: ${{ inputs.project-version }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JRELEASER_PLATFORM_OVERRIDE: ${{ matrix.job.platform }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          retention-days: 1
+          name: artifacts
+          path: |
+            out/jreleaser/assemble/helloworld/archive/*.zip

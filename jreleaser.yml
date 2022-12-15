@@ -19,6 +19,7 @@ platform:
     aarch_64: arm64
     x86_64: x64
     windows: win
+    linux_musl: linux-musl
     
 release:
   github:
@@ -57,5 +58,5 @@ distributions:
         platform: 'linux-x86_64'
       - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-linux-arm64.zip'
         platform: 'linux-aarch_64'
-      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-linux_musl-x64.zip'
+      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-linux-musl-x64.zip'
         platform: 'linux_musl-x86_64'
