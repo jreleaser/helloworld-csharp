@@ -6,6 +6,7 @@ on:
 
 jobs:
   precheck:
+    if: github.repository == 'jreleaser/helloworld-csharp' && startsWith(github.event.head_commit.message, 'Releasing version') != true
     name: Precheck
     runs-on: ubuntu-latest
     outputs:
