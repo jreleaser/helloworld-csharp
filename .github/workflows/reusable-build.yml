@@ -13,10 +13,10 @@ jobs:
     timeout-minutes: 30
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install Dotnet
-        uses: actions/setup-dotnet@v3.0.2
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '6.0'
 
@@ -31,9 +31,9 @@ jobs:
           done
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           retention-days: 1
-          name: artifacts
+          name: binaries-all
           path: |
             bin

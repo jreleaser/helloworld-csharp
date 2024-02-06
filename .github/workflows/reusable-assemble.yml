@@ -9,7 +9,7 @@ on:
 
 jobs:
   assemble:
-    name: 'Assemble ${{ matrix.platform }}'
+    name: 'Assemble ${{ matrix.job.platform }}'
     strategy:
       fail-fast: true
       matrix:
@@ -24,22 +24,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Download artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: artifacts
+          pattern: binaries-all
+          merge-multiple: true
           path: bin
 
       - name: Download osx-arm artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: artifacts-osx-arm
+          name: binaries-osx-arm
+          merge-multiple: true
           path: bin/osx-arm64
 
       - name: Add executable permissions
-        run: chmod +x bin/**/*
+        run: |
+          ls -l bin/**/*
+          chmod +x bin/**/*
           
       - name: Assemble
         uses: jreleaser/release-action@v2
@@ -50,10 +54,19 @@ jobs:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JRELEASER_PLATFORM_OVERRIDE: ${{ matrix.job.platform }}
 
+      - name: JReleaser output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jreleaser-assemble-${{ matrix.job.platform }}
+          path: |
+            out/jreleaser/trace.log
+            out/jreleaser/output.properties
+
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           retention-days: 1
-          name: artifacts
+          name: artifact-${{ matrix.job.platform }}
           path: |
             out/jreleaser/assemble/helloworld/archive/*.zip
