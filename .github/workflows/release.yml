@@ -34,21 +34,9 @@ jobs:
     with:
       project-version: ${{ needs.precheck.outputs.VERSION }}
 
-  build-osx-arm:
-    needs: [ precheck ]
-    uses: jreleaser/helloworld-csharp/.github/workflows/reusable-build-osx-arm.yml@main
-    with:
-      project-version: ${{ needs.precheck.outputs.VERSION }}
-
-  assemble:
-    needs: [ precheck, build, build-osx-arm ]
-    uses: jreleaser/helloworld-csharp/.github/workflows/reusable-assemble.yml@main
-    with:
-      project-version: ${{ needs.precheck.outputs.VERSION }}
-
   release:
     name: Release
-    needs: [ precheck, assemble ]
+    needs: [ precheck, build ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

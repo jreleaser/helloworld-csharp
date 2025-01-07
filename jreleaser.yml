@@ -2,6 +2,35 @@ environment:
   properties:
     artifactsDir: out/jreleaser/assemble/helloworld/archive
 
+matrix:
+  rows:
+    - { runtime: osx-x64,        platform: osx-x86_64        }
+    - { runtime: osx-arm64,      platform: osx-aarch_64      }
+    - { runtime: win-x64,        platform: windows-x86_64    }
+    - { runtime: win-arm64,      platform: windows-aarch_64  }
+    - { runtime: linux-x64,      platform: linux-x86_64      }
+    - { runtime: linux-arm64,    platform: linux-aarch_64    }
+    - { runtime: linux-musl-x64, platform: linux_musl-x86_64 }
+
+hooks:
+  script:
+    before:
+      - run: |
+          dotnet build --configuration Release
+          mkdir bin
+        filter:
+          includes: ['assemble']
+      - run: |
+          dotnet publish src/helloworld/helloworld.csproj -r $RUNTIME --configuration Release /p:Version=$VERSION --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true --output bin/$RUNTIME
+          chmod +x bin/$RUNTIME/*
+        applyDefaultMatrix: true
+        verbose: true
+        environment:
+          VERSION: '{{ projectVersion }}'
+          RUNTIME: '{{ matrix.runtime }}'
+        filter:
+          includes: ['assemble']
+
 project:
   name: helloworld
   description: HelloWorld in C#
@@ -12,14 +41,7 @@ project:
     - Andres Almiray
   license: APACHE-2.0
   inceptionYear: 2022
-  stereotype: cli
-
-platform:
-  replacements:
-    aarch_64: arm64
-    x86_64: x64
-    windows: win
-    linux_musl: linux-musl
+  stereotype: CLI
     
 release:
   github:
@@ -35,9 +57,10 @@ assemble:
     helloworld:
       active: ALWAYS
       formats: [ ZIP ]
-      attachPlatform: true
+      applyDefaultMatrix: true
+      archiveName: '{{distributionName}}-{{projectVersion}}-{{ matrix.platform }}'
       fileSets:
-        - input: 'bin/{{osPlatformReplaced}}'
+        - input: 'bin/{{ matrix.runtime }}'
           output: 'bin'
           includes: ['helloworld{.exe,}']
         - input: '.'
@@ -45,18 +68,5 @@ assemble:
           
 distributions:
   helloworld:
-    artifacts:
-      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-osx-arm64.zip'
-        platform: 'osx-aarch_64'
-      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-osx-x64.zip'
-        platform: 'osx-x86_64'
-      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-win-x64.zip'
-        platform: 'windows-x86_64'
-      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-win-arm64.zip'
-        platform: 'windows-aarch_64'
-      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-linux-x64.zip'
-        platform: 'linux-x86_64'
-      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-linux-arm64.zip'
-        platform: 'linux-aarch_64'
-      - path: '{{artifactsDir}}/{{distributionName}}-{{projectVersion}}-linux-musl-x64.zip'
-        platform: 'linux_musl-x86_64'
+    executable:
+      windowsExtension: exe

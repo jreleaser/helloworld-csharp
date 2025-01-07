@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -18,22 +18,30 @@ jobs:
       - name: Install Dotnet
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '6.0'
+          dotnet-version: '8.0'
 
-      - name: Create binaries
-        run: |
-          VERSION=${{ inputs.project-version }}
-          dotnet build --configuration Release
-          mkdir bin
-          for runtime in linux-x64 linux-musl-x64 linux-arm64 win-x64 win-arm64 osx-x64
-          do
-            dotnet publish src/helloworld/helloworld.csproj -r $runtime --configuration Release /p:Version=$VERSION --self-contained true /p:PublishSingleFile=true /p:IncludeNativeLibrariesInSingleFile=true /p:IncludeNativeLibrariesForSelfExtract=true --output bin/$runtime
-          done
+      - name: Assemble
+        uses: jreleaser/release-action@v2
+        with:
+          arguments: assemble
+        env:
+          JRELEASER_PROJECT_VERSION: ${{ inputs.project-version }}
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: JReleaser output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jreleaser-assemble-${{ matrix.job.platform }}
+          path: |
+            out/jreleaser/trace.log
+            out/jreleaser/output.properties
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           retention-days: 1
-          name: binaries-all
+          name: artifact-${{ matrix.job.platform }}
           path: |
-            bin
+            out/jreleaser/assemble/helloworld/archive/*.zip
+
